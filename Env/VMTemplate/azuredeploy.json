@@ -8,12 +8,6 @@
         "description": "作成するラボインスタンスの名前"
       }
     },
-    "vmName": {
-      "type": "string",
-      "metadata": {
-        "description": "作成するVMの名前"
-      }
-    },
     "userName": {
       "type": "string",
       "metadata": {
@@ -36,7 +30,7 @@
     {
       "apiVersion": "2018-09-15",
       "type": "Microsoft.DevTestLab/labs/virtualmachines",
-      "name": "[parameters('vmName')]",
+      "name": "[parameters('labName')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "labVirtualNetworkId": "[variables('labVirtualNetworkId')]",
