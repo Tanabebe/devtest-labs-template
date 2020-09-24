@@ -1,65 +1,98 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-    "newVMName": {
-      "type": "string",
-      "defaultValue": "vm-winserve-01"
-    },
     "labName": {
       "type": "string",
-      "defaultValue": "devtest-labs-env-001"
+      "metadata": {
+        "description": "作成するラボインスタンスの名前"
+      }
     },
-    "size": {
+    "location": {
       "type": "string",
-      "defaultValue": "Standard_B1ms"
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "リソースの場所"
+      }
+    },    
+    "vmName": {
+      "type": "string",
+      "metadata": {
+        "description": "作成するVMの名前"
+      }
     },
+  "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_B1ms",      
+      "metadata": {
+        "description": "作成するVMのサイズ"
+      }
+    },	 
     "userName": {
       "type": "string",
-      "defaultValue": "azureuser"
+      "metadata": {
+        "description": "vmで作成されるアカウントのユーザー名。"
+      }
     },
     "password": {
-      "type": "securestring"
-    }
+      "type": "securestring",
+      "metadata": {
+        "description": "vmで作成されるローカルアカウントのパスワード。"
+      }	
+    }	
   },
   "variables": {
     "labSubnetName": "[concat(variables('labVirtualNetworkName'), 'Subnet')]",
     "labVirtualNetworkId": "[resourceId('Microsoft.DevTestLab/labs/virtualnetworks', parameters('labName'), variables('labVirtualNetworkName'))]",
-    "labVirtualNetworkName": "[concat('Dtl', parameters('labName'))]",
-    "vmId": "[resourceId ('Microsoft.DevTestLab/labs/virtualmachines', parameters('labName'), parameters('newVMName'))]",
-    "vmName": "[concat(parameters('labName'), '/', parameters('newVMName'))]"
-  },
+    "labVirtualNetworkName": "[concat('Dtl', parameters('labName'))]"
+  },  
   "resources": [
     {
-      "apiVersion": "2016-05-15",
-      "type": "Microsoft.DevTestLab/labs/virtualmachines",
-      "name": "[variables('vmName')]",
-      "location": "[resourceGroup().location]",
-      "properties": {
-        "labVirtualNetworkId": "[variables('labVirtualNetworkId')]",
-        "notes": "Windows Server 2019 Datacenter",
-        "galleryImageReference": {
-          "offer": "WindowsServer",
-          "publisher": "MicrosoftWindowsServer",
-          "sku": "2019-Datacenter",
-          "osType": "Windows",
-          "version": "latest"
+      "apiVersion": "2018-09-15",
+      "type": "Microsoft.DevTestLab/labs",
+      "name": "[parameters('labName')]",
+      "location": "[parameters('location')]",
+      "resources": [
+        {
+          "apiVersion": "2018-09-15",
+          "name": "[variables('labVirtualNetworkName')]",
+          "type": "virtualNetworks",
+          "dependsOn": [
+            "[resourceId('Microsoft.DevTestLab/labs', parameters('labName'))]"
+          ]
         },
-        "size": "[parameters('size')]",
-        "userName": "[parameters('userName')]",
-        "password": "[parameters('password')]",
-        "isAuthenticationWithSshKey": false,
-        "labSubnetName": "[variables('labSubnetName')]",
-        "disallowPublicIpAddress": false,
-        "storageType": "Standard",
-        "allowClaim": true
-      }
+        {
+          "apiVersion": "2018-09-15",
+          "type": "virtualMachines",
+          "name": "[parameters('vmName')]",
+          "location": "[parameters('location')]",
+          "dependsOn": [
+            "[resourceId('Microsoft.DevTestLab/labs', parameters('labName'))]",
+            "[resourceId('Microsoft.DevTestLab/labs/virtualnetworks', parameters('labName'), variables('labVirtualNetworkName'))]"            
+          ],		
+          "properties": {
+            "userName": "[parameters('userName')]",
+            "password": "[parameters('password')]",
+            "labVirtualNetworkId": "[variables('labVirtualNetworkId')]",
+            "labSubnetName": "[variables('labSubnetName')]",
+            "size": "[parameters('vmSize')]",    
+            "allowClaim": "true",            
+            "galleryImageReference": {
+              "offer": "WindowsServer",
+              "publisher": "MicrosoftWindowsServer",
+              "sku": "2019-Datacenter",
+              "osType": "Windows",
+              "version": "latest"
+            }
+          }
+        }
+      ]    
     }
   ],
   "outputs": {
-    "labVMId": {
+    "labId": {
       "type": "string",
-      "value": "[variables('vmId')]"
-    }
+      "value": "[resourceId('Microsoft.DevTestLab/labs', parameters('labName'))]"
+    }    
   }
 }
