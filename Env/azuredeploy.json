@@ -13,7 +13,7 @@
       "size": {
         "type": "string",
         "defaultValue": "Standard_B1ms"
-      },
+      }
     },
     "variables": {
       "labSubnetName": "[concat(variables('labVirtualNetworkName'), 'Subnet')]",
@@ -24,7 +24,7 @@
     },
     "resources": [
       {
-        "apiVersion": "2018-10-15-preview",
+        "apiVersion": "2018-09-15",
         "type": "Microsoft.DevTestLab/labs/virtualmachines",
         "name": "[variables('vmName')]",
         "location": "[resourceGroup().location]",
