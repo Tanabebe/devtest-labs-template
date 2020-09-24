@@ -4,23 +4,16 @@
     "parameters": {
       "newVMName": {
         "type": "string",
-        "defaultValue": "vm-winserve-01"
+        "defaultValue": ""
       },
       "labName": {
         "type": "string",
-        "defaultValue": "devtest-labs-env-001"
+        "defaultValue": ""
       },
       "size": {
         "type": "string",
         "defaultValue": "Standard_B1ms"
       },
-      "userName": {
-        "type": "string",
-        "defaultValue": "azureuser"
-      },
-      "password": {
-        "type": "securestring"
-      }
     },
     "variables": {
       "labSubnetName": "[concat(variables('labVirtualNetworkName'), 'Subnet')]",
@@ -46,8 +39,6 @@
             "version": "latest"
           },
           "size": "[parameters('size')]",
-          "userName": "[parameters('userName')]",
-          "password": "[parameters('password')]",
           "isAuthenticationWithSshKey": false,
           "labSubnetName": "[variables('labSubnetName')]",
           "disallowPublicIpAddress": false,
