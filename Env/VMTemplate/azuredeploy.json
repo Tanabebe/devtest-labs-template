@@ -1,36 +1,39 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "newVMName": {
+      "type": "string",
+      "defaultValue": "vm-test-001"
+    },
     "labName": {
       "type": "string",
-      "metadata": {
-        "description": "作成するラボインスタンスの名前"
-      }
+      "defaultValue": "devtest-labs-env-001"
+    },
+    "size": {
+      "type": "string",
+      "defaultValue": "Standard_B1ms"
     },
     "userName": {
       "type": "string",
-      "metadata": {
-        "description": "vmで作成されるアカウントのユーザー名。"
-      }
+      "defaultValue": "azureuser"
     },
     "password": {
-      "type": "securestring",
-      "metadata": {
-        "description": "vmで作成されるローカルアカウントのパスワード。"
-      }	
-    }	
+      "type": "securestring"
+    }
   },
   "variables": {
     "labSubnetName": "[concat(variables('labVirtualNetworkName'), 'Subnet')]",
     "labVirtualNetworkId": "[resourceId('Microsoft.DevTestLab/labs/virtualnetworks', parameters('labName'), variables('labVirtualNetworkName'))]",
-    "labVirtualNetworkName": "[concat('Dtl', parameters('labName'))]"
+    "labVirtualNetworkName": "[concat('Dtl', parameters('labName'))]",
+    "vmId": "[resourceId ('Microsoft.DevTestLab/labs/virtualmachines', parameters('labName'), parameters('newVMName'))]",
+    "vmName": "[concat(parameters('labName'), '/', parameters('newVMName'))]"
   },
   "resources": [
     {
-      "apiVersion": "2018-09-15",
+      "apiVersion": "2018-10-15-preview",
       "type": "Microsoft.DevTestLab/labs/virtualmachines",
-      "name": "[parameters('labName')]",
+      "name": "[variables('vmName')]",
       "location": "[resourceGroup().location]",
       "properties": {
         "labVirtualNetworkId": "[variables('labVirtualNetworkId')]",
@@ -42,7 +45,7 @@
           "osType": "Windows",
           "version": "latest"
         },
-        "size": "Standard_B1ms",
+        "size": "[parameters('size')]",
         "userName": "[parameters('userName')]",
         "password": "[parameters('password')]",
         "isAuthenticationWithSshKey": false,
@@ -52,11 +55,11 @@
         "allowClaim": true
       }
     }
-  ], 
+  ],
   "outputs": {
-    "labId": {
+    "labVMId": {
       "type": "string",
-      "value": "[resourceId('Microsoft.DevTestLab/labs', parameters('labName'))]"
-    }    
+      "value": "[variables('vmId')]"
+    }
   }
 }
